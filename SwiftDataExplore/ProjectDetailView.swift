@@ -14,13 +14,31 @@ struct ProjectDetailView: View {
     @State private var newTaskName = ""
     @State private var showStatusPicker = false
     @State private var selectedJob: Job? = nil
+    @State private var showAllTask = false
+    
+    enum SortOption: String, CaseIterable {
+        case deadline = "Deadline"
+        case points = "Points"
+    }
+    @State private var selectedSort: SortOption = .deadline
     
     var project: Project
     @State private var addTask = false
     var body: some View {
         Form {
+            
+            Section {
+                Toggle("Show Completed Tasks", isOn: $showAllTask)
+                Picker("Sort by", selection: $selectedSort) {
+                    ForEach(SortOption.allCases, id: \.self) {
+                        Text($0.rawValue)
+                    }
+                }
+                .pickerStyle(.segmented)
+            }
+            
             Section("Tasks") {
-                ForEach(project.jobs) { job in
+                ForEach(displayedJobs) { job in
                     VStack(alignment: .leading, spacing: 10) {
                         HStack {
                             Text(job.title)
@@ -73,6 +91,22 @@ struct ProjectDetailView: View {
         }
         .sheet(item: $selectedJob) { job in
                 StatusPickerView(job: job)
+        }
+    }
+    
+    var displayedJobs: [Job] {
+        let jobs = showAllTask ? project.jobs : project.jobs.filter { !$0.isCompleted }
+        return sortJobs(jobs)
+    }
+    
+    func sortJobs(_ jobs: [Job]) -> [Job] {
+        switch selectedSort {
+        case .deadline:
+            return jobs.sorted {
+                ($0.deadlineTime ?? Date.distantFuture) < ($1.deadlineTime ?? Date.distantFuture)
+            }
+        case .points:
+            return jobs.sorted { $0.points > $1.points }
         }
     }
 }

@@ -14,3 +14,7 @@ func dateFormatter(_ date: Date?) -> String {
         return "No deadline yet"
     }
 }
+
+func updateOngoingCount(for person: Person) {
+    person.ongoingTaskCount = person.jobs.filter { $0.status == .inProgress }.count
+}

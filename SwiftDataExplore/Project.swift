@@ -10,6 +10,9 @@ import SwiftData
 
 @Model
 class Project {
+    #Unique<Project>([\.name])
+    #Index<Project>([\.name])
+    
     var name: String
     var isComplete: Bool
     var createdTime: Date

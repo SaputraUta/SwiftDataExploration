@@ -18,6 +18,9 @@ struct StatusPickerView: View {
                 ForEach(JobStatus.allCases, id: \.self) { status in
                     Button {
                         job.status = status
+                        if let person = job.assignee {
+                            updateOngoingCount(for: person)
+                        }
                         dismiss()
                     } label: {
                         HStack {

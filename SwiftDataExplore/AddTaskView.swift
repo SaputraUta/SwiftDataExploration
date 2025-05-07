@@ -15,7 +15,7 @@ struct AddTaskView: View {
     @Bindable var project: Project
     @Binding var taskName: String
     @State private var selectedPerson: Person?
-    @State private var selectedDeadline = Calendar.current.date(byAdding: .month, value: 1, to: Date()) ?? Date()
+    @State private var selectedDeadline = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
     @State private var selectedPoint = 1
     
     var body: some View {
@@ -23,12 +23,9 @@ struct AddTaskView: View {
             Form {
                 TextField("Task name", text: $taskName)
                 Picker("Person", selection: $selectedPerson) {
-                    if people.isEmpty {
-                        Text("No person available").tag(PersonRole.other)
-                    } else {
-                        ForEach(people, id: \.self) { person in
-                            Text(person.name).tag(Optional(person))
-                        }
+                    Text("None").tag(Optional<Person>.none)
+                    ForEach(people, id: \.self) { person in
+                        Text(person.name).tag(Optional(person))
                     }
                 }
                 .pickerStyle(.menu)
@@ -43,9 +40,12 @@ struct AddTaskView: View {
                 Button(action: {
                     let newJob = Job(title: taskName, isCompleted: false, deadlineTime: selectedDeadline, points: selectedPoint, project: project)
                     newJob.assignee = selectedPerson
+                    if let person = selectedPerson {
+                        updateOngoingCount(for: person)
+                    }
                     project.jobs.append(newJob)
                     selectedPerson = nil
-                    selectedDeadline = Calendar.current.date(byAdding: .month, value: 1, to: Date()) ?? Date()
+                    selectedDeadline = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
                     selectedPoint = 1
                     taskName = ""
                     dismiss()

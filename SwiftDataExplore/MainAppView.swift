@@ -16,7 +16,7 @@ struct MainAppView: View {
                     Label("Projects", systemImage: "folder")
                 }
             
-            PersonListView()
+            PeoplePageView()
                 .tabItem {
                     Label("People", systemImage: "person.2")
                 }

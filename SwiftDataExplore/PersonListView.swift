@@ -11,10 +11,19 @@ import SwiftData
 struct PersonListView: View {
     @Query var people: [Person]
     @Environment(\.modelContext) var modelContext
-    @State private var addPerson = false
+    
+    init(sortOrder: [SortDescriptor<Person>], searchText: String) {
+        let trimmed = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty {
+            _people = Query(sort: sortOrder)
+        } else {
+            _people = Query(filter: #Predicate<Person> { person in
+                person.name.localizedStandardContains(trimmed)
+            }, sort: sortOrder)
+        }
+    }
     
     var body: some View {
-        NavigationStack {
             List {
                 ForEach(people) { person in
                     NavigationLink(value: person) {
@@ -37,19 +46,6 @@ struct PersonListView: View {
                     }
                 }
             }
-            .navigationTitle("People")
-            .navigationDestination(for: Person.self) { person in
-                PersonDetailView(person: person)
-            }
-            .toolbar {
-                Button("Add", systemImage: "plus") {
-                    addPerson = true
-                }
-            }
-        }
-        .sheet(isPresented: $addPerson) {
-            AddPersonView()
-        }
     }
 }
 
@@ -66,7 +62,9 @@ struct PersonListView: View {
         let job = Job(title: "Test job", isCompleted: false, deadlineTime: .now, points: 2, status: .inProgress, project: project, assignee: person)
         context.insert(job)
         
-        return PersonListView()
+        return NavigationStack {
+            PersonListView(sortOrder: [SortDescriptor(\Person.name)], searchText: "")
+        }
             .modelContainer(container)
     } catch {
         fatalError("Error: \(error)")

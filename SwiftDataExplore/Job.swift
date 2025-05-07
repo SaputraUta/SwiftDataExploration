@@ -11,6 +11,9 @@ import SwiftUI
 
 @Model
 class Job {
+    #Unique<Job>([\.title, \.project, \.assignee])
+    #Index<Job>([\.isCompleted], [\.deadlineTime], [\.points])
+    
     var title: String
     var isCompleted: Bool
     var createdTime: Date
